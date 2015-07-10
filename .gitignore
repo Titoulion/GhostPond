@@ -1,0 +1,15 @@
+Ghost Pond_Unity/[Ll]ibrary/
+Ghost Pond_Unity/[Tt]emp/
+Ghost Pond_Unity/[Oo]bj/
+Ghost Pond_Unity/[Bb]uild/
+Ghost Pond_Unity/*.csproj
+Ghost Pond_Unity/*.unityproj
+Ghost Pond_Unity/*.sln
+Ghost Pond_Unity/*.suo
+Ghost Pond_Unity/*.tmp
+Ghost Pond_Unity/*.user
+Ghost Pond_Unity/*.userprefs
+Ghost Pond_Unity/*.pidb
+Ghost Pond_Unity/*.booproj
+Ghost Pond_Unity/*.pidb.meta
+Ghost Pond_Unity/sysinfo.txt
