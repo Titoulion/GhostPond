@@ -55,6 +55,12 @@ public class FishScript : MonoBehaviour {
 	float headSize = 0f;
 	public float nextHeadSize = 2f;
 
+	float outlineWidth = 0f;
+	public float nextOutlineWidth;
+
+
+
+
 
 
 
@@ -231,7 +237,7 @@ public class FishScript : MonoBehaviour {
 
 
 
-			bodyPart.GetComponent<BodyPartScript>().SetColors(mainColorA,mainColorB,outlineColorA,outlineColorB);
+			bodyPart.GetComponent<BodyPartScript>().SetColors(mainColorA,mainColorB,mainColorB,mainColorA);
 
 
 			if(i>0)
@@ -423,7 +429,8 @@ public class FishScript : MonoBehaviour {
 
 	public void AffectProperty2()
 	{
-		radiusMotionBodyParts = radiusMotionBodyParts>0.75f?Random.Range (0f,0.75f):Random.Range (0.75f,1.5f);
+		//radiusMotionBodyParts = radiusMotionBodyParts>0.75f?Random.Range (0f,0.75f):Random.Range (0.75f,1.5f);
+		nextOutlineWidth = nextOutlineWidth>0.5f?Random.Range (0f,0.5f):Random.Range (0.5f,1f);
 	}
 
 	public void AffectProperty3()
@@ -435,6 +442,12 @@ public class FishScript : MonoBehaviour {
 	void ProgressionsProperties()
 	{
 
+		outlineWidth += (nextOutlineWidth-outlineWidth)*0.1f;
+
+
+
+
+
 		tailLenght+=(nextTailLenght-tailLenght)*0.1f;
 
 		headSize+=(nextHeadSize-headSize)*0.1f;
@@ -444,6 +457,8 @@ public class FishScript : MonoBehaviour {
 			bodyParts[i].GetComponent<BodyPartScript>().SetSize(headSize* (1f-Mathf.Clamp01(progress)));
 			bodyParts[i].GetComponent<TrailRenderer>().startWidth =bodyParts[i].GetComponent<BodyPartScript>().GetSize();
 			bodyParts[i].GetComponent<TrailRenderer>().endWidth =0f;
+
+			bodyParts[i].GetComponent<Renderer>().material.SetFloat ("_OutlineWidth",outlineWidth);
 		}
 	}
 }
