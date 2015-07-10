@@ -139,7 +139,15 @@ public class MainScript : MonoBehaviour {
 		
 	}
 
+	public void ConnectionPlayer(bool connect)
+	{
+		playerConnected = connect;
+	}
 
+	public void SetBPM(float _bpm)
+	{
+		bpm=_bpm;
+	}
 
 	void AutoHeartBeat()
 	{

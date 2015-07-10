@@ -11,12 +11,13 @@ public class OSCInterface : MonoBehaviour
     public int serverIP = 12000;
 
     private OSCServer server;
+	MainScript main;
 
 
     private void Awake()
     {
         OSCHandler.Instance.CreateServer(ServerName, serverIP);
-
+		main = MainScript.Instance;
         var pd = OSCHandler.Instance.Servers[ServerName];
         server = pd.server;
         Debug.Log("OSC: "+server);
@@ -50,22 +51,26 @@ public class OSCInterface : MonoBehaviour
         	if(Int32.Parse(packet.Data[0].ToString()) == 1){
                 //Player Connected!
                 Debug.Log("Player Connected!");
+				main.ConnectionPlayer(true);
             }
             else if (Int32.Parse(packet.Data[0].ToString()) == 0)
             {
                 //Player disconnected
                 Debug.Log("Player disconnected!");
+				main.ConnectionPlayer(false);
 
             }
 
         }else if(packet.Address.StartsWith("/player/heartbeat/trigger")){
             //Player heartbeat trigger Detected
             Debug.Log("Heartbeat");
+			main.HeartBeat();
 
         }else if(packet.Address.StartsWith("/player/heartbeat/bpm")){
             //New Heartbeat BPM is in packet.Data[0]
             float newBpm = float.Parse(packet.Data[0].ToString());
             Debug.Log("Heartbeat BPM: " + newBpm);
+			main.SetBPM(newBpm);
 
         }else if(packet.Address.StartsWith("/player/activation")){
             //Overall player activation curve value is in packet.Data[0]

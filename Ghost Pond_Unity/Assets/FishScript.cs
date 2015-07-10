@@ -219,13 +219,15 @@ public class FishScript : MonoBehaviour {
 
 
 			GameObject bodyPart = Instantiate(prefabBodyPart,transform.position,Quaternion.identity) as GameObject;
+			//bodyPart.transform.eulerAngles = new Vector3(0f,0f,Random.Range (0f,360f));
 			bodyPart.transform.parent = transform;
-
+			bodyPart.GetComponent<Renderer>().material.SetFloat ("_RotationPerlin",Random.Range (0f,360f));
 
 
 
 			bodyPart.GetComponent<BodyPartScript>().SetSize(headSize* progress);
 			bodyParts[i] = bodyPart;
+
 			//bodyPart.GetComponent<BodyPartScript>().SetLerpsColors(Mathf.PerlinNoise(progress*512f,0f),Mathf.PerlinNoise(progress*512f,0f));
 			bodyPart.GetComponent<BodyPartScript>().SetLerpsColors(main.Map(progress,1f,0f,0.2f,0.8f),main.Map(progress,1f,0f,0.2f,0.8f));
 			bodyPart.GetComponent<BodyPartScript>().SetOutlineWidth(Random.Range(0.0f,0.2f));
