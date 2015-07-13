@@ -58,11 +58,32 @@ public class FishScript : MonoBehaviour {
 	float outlineWidth = 0f;
 	public float nextOutlineWidth;
 
+	float timeLife = 0f;
+
+	public Vector3 centerPond = new Vector3(17f,0f,0f);
+
+
+
+	[Range(0f,1f)]
+	public float progressChangementPond = 0f;
+
+	[Range(0f,1f)]
+	public float progressCentreLittlePond = 0f;
 
 
 
 
+	bool goCenter = false;
+	bool goBigPond = false;
 
+	float transitionFromProgressCircle = 0f;
+
+	float transitionProgressCircle = 0f;
+
+	public AnimationCurve curveGoCenter;
+
+
+	float timerBeforeGoBigPond = 5f;
 
 
 
@@ -174,13 +195,27 @@ public class FishScript : MonoBehaviour {
 
 
 
-		nextHeadSize = Random.Range (1f,4f);
-		nextTailLenght= Random.Range (0.2f,1.2f);
-		tailLenght= nextTailLenght;
+		//nextHeadSize = Random.Range (1f,4f);
+		//nextTailLenght= Random.Range (0.2f,1.2f);
+		//tailLenght= nextTailLenght;
 		progressCircle = Random.value;
 
+		radiusMotionBodyParts = Random.Range (0f,1.2f);
 
 
+
+	}
+
+	public void SetInitPropertiesValues(float p1, float p2, float p3)
+	{
+		nextTailLenght = p1;
+		tailLenght = p1;
+
+		nextOutlineWidth = p2;
+		outlineWidth = p2;
+
+		nextHeadSize = p3;
+		headSize = 0f;
 	}
 
 	void ChangeValuesVirage()
@@ -277,8 +312,11 @@ public class FishScript : MonoBehaviour {
 		if(started)
 		{
 			UpdateValues();
-			MovementCircle();
+			Mouvement();
 			PositionBodyParts();
+
+
+			timeLife+=Time.deltaTime;
 		}
 			
 	}
@@ -290,58 +328,105 @@ public class FishScript : MonoBehaviour {
 		ProgressionsProperties();
 	}
 
-	void MovementVirage()
-	{
 
 
-		valueVirage+=Time.deltaTime*speedVirage*sensVirage;
-
-		if(sensVirage==1)
-		{
-			if(valueVirage>nextValueVirage)
-			{
-				valueVirage = nextValueVirage;
-				ChangeValuesVirage();
-			}
-		}
-		else
-		{
-			if(valueVirage<nextValueVirage)
-			{
-				valueVirage = nextValueVirage;
-				ChangeValuesVirage();
-			}
-		}
-
-
-
-
-		Vector3 pos = transform.position;
-
-		pos+=Vector3.right*Mathf.Cos (valueVirage*2f*Mathf.PI)*speedMotion+Vector3.up*Mathf.Sin (valueVirage*2f*Mathf.PI)*speedMotion;
-
-		transform.position = pos;
-
-
-
-
-
-
-
-
-
-
-	}
-
-	void MovementCircle()
+	void Mouvement()
 	{
 		progressCircle+=Time.deltaTime*speedProgressCircle.value*main.pulse;
 
 
-		Vector3 pos = Vector3.zero;
 
-		pos.x+=Mathf.Cos(progressCircle*Mathf.PI*2f)*radiusMotion.value;
-		pos.y+=Mathf.Sin(progressCircle*Mathf.PI*2f)*radiusMotion.value;
+		if(Input.GetKeyDown(KeyCode.T))
+		{
+			goCenter = !goCenter;
+
+			transitionFromProgressCircle = Modulo(progressCircle,1f)-4f;
+			timerBeforeGoBigPond = 10f;
+
+
+		}
+
+		transitionProgressCircle = Mathf.Lerp (transitionFromProgressCircle,0f,progressCentreLittlePond);
+
+		float _progressCircle = progressCircle;
+
+		if(goCenter)
+		{
+			progressCentreLittlePond=Mathf.Clamp01(progressCentreLittlePond+Time.deltaTime*0.2f);
+
+
+			_progressCircle = transitionProgressCircle;
+		}
+		else
+		{
+			progressCentreLittlePond=Mathf.Clamp01(progressCentreLittlePond-Time.deltaTime*0.2f);
+		}
+
+
+		if(goBigPond)
+		{
+
+			progressChangementPond = Mathf.Clamp01(progressChangementPond+Time.deltaTime*0.2f);
+			centerPond = Vector3.Lerp(Vector3.right*15f,Vector3.zero,progressChangementPond);
+
+
+			if(progressChangementPond==1f)
+			{
+				goBigPond = false;
+			}
+		}
+		else if(goCenter)
+		{
+
+
+
+
+
+
+
+
+			centerPond = Vector3.Lerp(Vector3.right*17f,Vector3.right*15f,curveGoCenter.Evaluate(progressCentreLittlePond));
+
+
+			timerBeforeGoBigPond-=Time.deltaTime;
+
+			if(timerBeforeGoBigPond<=0f)
+			{
+				goBigPond = true;
+				goCenter = false;
+
+				radiusMotion.minMaxNextValue = new Vector2(1f,11f);
+				radiusMotion.minMaxDurationProgress= new Vector2(1f,1.5f);
+
+
+				speedProgressCircle.minMaxNextValue = new Vector2(0.1f,0.3f);
+				radiusMotion.minMaxDurationProgress= new Vector2(1f,3f);
+				speedProgressCircle.useRandomSigne = true;
+
+
+			}
+
+
+		}
+
+
+
+
+
+
+		Vector3 pos = centerPond;
+
+		//_progress = Mathf.Clamp01(progressIntro*2f);
+
+		pos.x+=Mathf.Cos(_progressCircle*Mathf.PI*2f)*radiusMotion.value*(1f-progressCentreLittlePond);
+		pos.y+=Mathf.Sin(_progressCircle*Mathf.PI*2f)*radiusMotion.value*(1f-progressCentreLittlePond);
+
+
+		pos+=Vector3.up*Mathf.Sin(Time.realtimeSinceStartup*2f)*progressCentreLittlePond*0.2f+Vector3.right*Mathf.Cos(Time.realtimeSinceStartup*2f)*progressCentreLittlePond*0.2f;
+
+
+
+
 
 
 		transform.position = pos;
@@ -424,35 +509,54 @@ public class FishScript : MonoBehaviour {
 		return ((val - fromMin) / (fromMax - fromMin)) * (toMax - toMin) + toMin;
 	}
 
-	public void AffectProperty1()
+	float Modulo(float a,float b)
 	{
-		nextTailLenght = nextTailLenght>0.7f?Random.Range (0.1f,0.7f):Random.Range (0.7f,1.3f);
+		return a - b * Mathf.Floor(a / b);
 	}
 
-	public void AffectProperty2()
+	public void AffectProperty1(float _value)
+	{
+		//nextTailLenght = nextTailLenght>0.7f?Random.Range (0.1f,0.7f):Random.Range (0.7f,1.3f);
+
+		nextTailLenght = _value;
+		//ProgressionsProperties();
+
+
+	}
+
+	public void AffectProperty2(float _value)
 	{
 		//radiusMotionBodyParts = radiusMotionBodyParts>0.75f?Random.Range (0f,0.75f):Random.Range (0.75f,1.5f);
-		nextOutlineWidth = nextOutlineWidth>0.5f?Random.Range (0f,0.5f):Random.Range (0.5f,1f);
+		//nextOutlineWidth = nextOutlineWidth>0.5f?Random.Range (0f,0.5f):Random.Range (0.5f,1f);
+		nextOutlineWidth = _value;
+		//ProgressionsProperties();
 	}
 
-	public void AffectProperty3()
+	public void AffectProperty3(float _value)
 	{
-		nextHeadSize = nextHeadSize>2.5f?Random.Range (0f,2.5f):Random.Range (2.5f,4f);
-
+		//nextHeadSize = nextHeadSize>2.5f?Random.Range (0f,2.5f):Random.Range (2.5f,4f);
+		nextHeadSize = _value;
+	//	ProgressionsProperties();
 	}
 
 	void ProgressionsProperties()
 	{
 
-		outlineWidth += (nextOutlineWidth-outlineWidth)*0.1f;
+		float valueProgressProgress = Map (Mathf.Clamp01(timeLife),0f,1f,0.1f,1f);
 
 
 
 
 
-		tailLenght+=(nextTailLenght-tailLenght)*0.1f;
+		outlineWidth += (nextOutlineWidth-outlineWidth)*valueProgressProgress;
 
-		headSize+=(nextHeadSize-headSize)*0.1f;
+
+
+
+
+		tailLenght+=(nextTailLenght-tailLenght)*valueProgressProgress;
+
+		headSize+=(nextHeadSize-headSize)*valueProgressProgress;
 		for (int i=0; i<bodyParts.Length; i++)
 		{
 			float progress = Map ((float)i,0f,(float)(bodyParts.Length-1),0f,1f);

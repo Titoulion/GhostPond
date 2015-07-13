@@ -23,7 +23,7 @@ public class OSCInterface : MonoBehaviour
         Debug.Log("OSC: "+server);
                
     }
-
+	
     private void OnEnable()
     {
         server.PacketReceivedEvent += OnPacketReceivedEvent;
@@ -64,7 +64,7 @@ public class OSCInterface : MonoBehaviour
         }else if(packet.Address.StartsWith("/player/heartbeat/trigger")){
             //Player heartbeat trigger Detected
             Debug.Log("Heartbeat");
-			main.HeartBeat();
+			main.HeartBeat(true);
 
         }else if(packet.Address.StartsWith("/player/heartbeat/bpm")){
             //New Heartbeat BPM is in packet.Data[0]
