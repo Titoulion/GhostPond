@@ -45,6 +45,9 @@ public class MainScript : MonoBehaviour {
 	public int lastCode = 0;
 
 
+	public bool pathOpened = false;
+
+
 
 
 
@@ -74,24 +77,30 @@ public class MainScript : MonoBehaviour {
 		if(Input.GetKeyDown(KeyCode.Space))
 			CreateFish ();
 
+		if(Input.GetKeyDown(KeyCode.Return))
+			pathOpened = !pathOpened;
 
-		if(Input.GetKey (KeyCode.Keypad1))
+		if(Input.GetKeyDown(KeyCode.Backspace))
+			playerConnected = !playerConnected;
+
+
+		if(currentFish!=null)
 		{
-			property1.Update();
-			AffectProperty1();
+			if(Input.GetKeyDown(KeyCode.T))
+			{
+				currentFish.GetComponent<FishScript>().LaunchGoBigPond();
+				
+				
+			}
+
+			if(Input.GetKeyDown(KeyCode.Y))
+			{
+				currentFish.GetComponent<FishScript>().StopGoBigPond();
+				
+				
+			}
 		}
 
-		if(Input.GetKey (KeyCode.Keypad2))
-		{
-			property2.Update();
-			AffectProperty2();
-		}
-
-		if(Input.GetKey (KeyCode.Keypad3))
-		{
-			property3.Update();
-			AffectProperty3();
-		}
 
 
 
@@ -147,7 +156,12 @@ public class MainScript : MonoBehaviour {
 			if(securityProgressOFF==0f)
 			{
 				wasPlayerConnected = false;
-				currentFish = null;
+
+
+				CheckDestroyFish();
+				//currentFish = null;
+				//currentFish.GetComponent<FishScript>().LaunchGoBigPond();
+
 				isRemoving = false;
 			}
 
@@ -159,7 +173,7 @@ public class MainScript : MonoBehaviour {
 			if(securityProgressON==0f)
 			{
 				wasPlayerConnected = true;
-				CreateFish();
+				//CreateFish();
 				isConnecting = false;
 			}
 		}
@@ -180,6 +194,7 @@ public class MainScript : MonoBehaviour {
 
 
 		ActivateStuff();
+		CheckToFreeFish();
 
 	}
 
@@ -192,6 +207,18 @@ public class MainScript : MonoBehaviour {
 	{
 		bpm=_bpm;
 	}
+
+	void CheckDestroyFish()
+	{
+		if(currentFish!=null)
+		{
+			currentFish.GetComponent<FishScript>().GoDie();
+			currentFish = null;
+		}
+	}
+
+
+
 
 	void AutoHeartBeat()
 	{
@@ -226,7 +253,7 @@ public class MainScript : MonoBehaviour {
 	void CreateFish()
 	{
 
-
+		Debug.Log ("ok");
 
 
 		currentFish = Instantiate (prefabFish,Vector3.right*17f,Quaternion.identity) as GameObject;
@@ -278,7 +305,12 @@ public class MainScript : MonoBehaviour {
 		if(currentFish!=null)
 		{
 			property3.Update();
+
+
+
 			currentFish.GetComponent<FishScript>().AffectProperty3(property3.GetValue());
+			
+
 		}
 	}
 
@@ -343,29 +375,41 @@ public class MainScript : MonoBehaviour {
 	{
 		string _code = GetIntBinaryString(lastCode);
 
+	
+
+
 		//Debug.Log ("binary: "+_code);
+
+		bool doCheckCreateFish = false;
 
 		if(_code.Length>=3)
 		{
-			if(_code[0].ToString ()=="1")
+			if(_code[0].ToString ()=="1" || Input.GetKeyDown (KeyCode.Keypad1))
 			{
 				AffectProperty1();
-				CheckToCreateFish();
+				doCheckCreateFish = true;
 
 
 			}
 			
-			if(_code[1].ToString ()=="1")
+			if(_code[1].ToString ()=="1" || Input.GetKeyDown (KeyCode.Keypad2))
 			{
 				AffectProperty2();
-				CheckToCreateFish();
+				doCheckCreateFish = true;
 			}
 			
-			if(_code[2].ToString ()=="1")
+			if(_code[2].ToString ()=="1" || Input.GetKeyDown (KeyCode.Keypad3))
 			{
 				AffectProperty3();
-				CheckToCreateFish();
+				doCheckCreateFish = true;
 			}
+		}
+
+
+		if(doCheckCreateFish)
+		{
+			CheckToCreateFish();
+			doCheckCreateFish = false;
 		}
 
 
@@ -374,11 +418,28 @@ public class MainScript : MonoBehaviour {
 
 	void CheckToCreateFish()
 	{
-		if(currentFish == null)
+		if(currentFish == null && pathOpened==false && playerConnected==true && wasPlayerConnected == true)
 		{
-
+			CreateFish();
 		}
+
+
 	}
+
+	void CheckToFreeFish()
+	{
+		if(currentFish!=null && pathOpened == true && playerConnected == true && wasPlayerConnected == true)
+		{
+			currentFish.GetComponent<FishScript>().LaunchGoBigPond();
+		}
+
+		if(currentFish!=null && pathOpened == false && playerConnected == true && wasPlayerConnected == true)
+		{
+			currentFish.GetComponent<FishScript>().StopGoBigPond();
+		}
+
+	}
+
 
 	static string GetIntBinaryString(int n)
 	{

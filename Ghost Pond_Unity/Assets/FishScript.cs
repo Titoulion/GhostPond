@@ -85,7 +85,12 @@ public class FishScript : MonoBehaviour {
 
 	float timerBeforeGoBigPond = 5f;
 
+	bool isInBigPond = false;
 
+	public bool dying = false;
+	bool dead = false;
+	float finalLife = 1f;
+	public AnimationCurve curveToNewPond;
 
 
 	[System.Serializable]
@@ -309,15 +314,20 @@ public class FishScript : MonoBehaviour {
 	// Update is called once per frame
 	void Update () 
 	{
-		if(started)
+
+		if(!dead)
 		{
-			UpdateValues();
-			Mouvement();
-			PositionBodyParts();
-
-
-			timeLife+=Time.deltaTime;
+			if(started)
+			{
+				UpdateValues();
+				Mouvement();
+				PositionBodyParts();
+				
+				
+				timeLife+=Time.deltaTime;
+			}
 		}
+
 			
 	}
 
@@ -329,6 +339,53 @@ public class FishScript : MonoBehaviour {
 	}
 
 
+	public void LaunchGoBigPond()
+	{
+		if(goBigPond==false && goCenter==false && isInBigPond == false)
+		{
+			goCenter = true;
+			//progressCentreLittlePond = 0f;
+			transitionFromProgressCircle = Modulo(progressCircle,1f)-4f;
+			timerBeforeGoBigPond = 10f;
+		}
+
+
+
+	}
+
+	public void StopGoBigPond()
+	{
+		if(goBigPond==false && goCenter == true&& isInBigPond == false)
+		{
+			goCenter = false;
+			//progressCircle = Modulo(progressCircle,1f);
+			//progressCentreLittlePond = 1f;
+			//transitionFromProgressCircle = Modulo(progressCircle,1f)-4f;
+
+
+
+			//PROGRESSCIRCLE GO ATAN TOO
+			
+
+			
+			//_progress = Mathf.Clamp01(progressIntro*2f);
+			
+
+
+			progressCircle = transitionProgressCircle = Mathf.Lerp (transitionFromProgressCircle,0f,progressCentreLittlePond);
+
+
+		
+		}
+		
+		
+		
+	}
+
+
+
+
+
 
 	void Mouvement()
 	{
@@ -336,78 +393,108 @@ public class FishScript : MonoBehaviour {
 
 
 
-		if(Input.GetKeyDown(KeyCode.T))
-		{
-			goCenter = !goCenter;
-
-			transitionFromProgressCircle = Modulo(progressCircle,1f)-4f;
-			timerBeforeGoBigPond = 10f;
 
 
-		}
 
-		transitionProgressCircle = Mathf.Lerp (transitionFromProgressCircle,0f,progressCentreLittlePond);
 
 		float _progressCircle = progressCircle;
 
-		if(goCenter)
+
+
+		if(isInBigPond==false)
 		{
-			progressCentreLittlePond=Mathf.Clamp01(progressCentreLittlePond+Time.deltaTime*0.2f);
+			if(goCenter)
+			{
+				progressCentreLittlePond=Mathf.Clamp01(progressCentreLittlePond+Time.deltaTime*0.2f);
 
 
-			_progressCircle = transitionProgressCircle;
+
+				transitionProgressCircle = Mathf.Lerp (transitionFromProgressCircle,0f,progressCentreLittlePond);
+				_progressCircle = transitionProgressCircle;
+			}
+			else
+			{
+				progressCentreLittlePond=Mathf.Clamp01(progressCentreLittlePond-Time.deltaTime*1.5f);
+
+
+
+
+				//transitionProgressCircle = progressCircle;
+				//_progressCircle = progressCircle;
+			}
+
+
+			if(goBigPond)
+			{
+
+				progressChangementPond = Mathf.Clamp01(progressChangementPond+Time.deltaTime*0.2f);
+				centerPond = Vector3.Lerp(Vector3.right*15f,Vector3.zero,curveToNewPond.Evaluate(progressChangementPond));
+
+
+				if(progressChangementPond==1f)
+				{
+
+					main.currentFish = null;
+					isInBigPond = true;
+
+					goBigPond = false;
+					goCenter = false;
+				}
+			}
+			else 
+			{
+
+
+				centerPond = Vector3.Lerp(Vector3.right*17f,Vector3.right*15f,curveGoCenter.Evaluate(progressCentreLittlePond));
+
+				if(goCenter)
+				{
+
+					
+					timerBeforeGoBigPond-=Time.deltaTime;
+					
+					if(timerBeforeGoBigPond<=0f)
+					{
+
+						goBigPond = true;
+						goCenter = false;
+						
+						radiusMotion.minMaxNextValue = new Vector2(1f,11f);
+						radiusMotion.minMaxDurationProgress= new Vector2(1f,1.5f);
+						
+						
+						speedProgressCircle.minMaxNextValue = new Vector2(0.1f,0.3f);
+						radiusMotion.minMaxDurationProgress= new Vector2(1f,3f);
+						speedProgressCircle.useRandomSigne = true;
+						
+						main.currentFish = null;
+						
+					}
+
+
+
+						
+
+
+
+
+
+
+					
+					
+				}
+
+
+
+			}
 		}
 		else
 		{
-			progressCentreLittlePond=Mathf.Clamp01(progressCentreLittlePond-Time.deltaTime*0.2f);
+			centerPond = Vector3.zero;
+			progressCentreLittlePond = 0f;
 		}
 
 
-		if(goBigPond)
-		{
-
-			progressChangementPond = Mathf.Clamp01(progressChangementPond+Time.deltaTime*0.2f);
-			centerPond = Vector3.Lerp(Vector3.right*15f,Vector3.zero,progressChangementPond);
-
-
-			if(progressChangementPond==1f)
-			{
-				goBigPond = false;
-			}
-		}
-		else if(goCenter)
-		{
-
-
-
-
-
-
-
-
-			centerPond = Vector3.Lerp(Vector3.right*17f,Vector3.right*15f,curveGoCenter.Evaluate(progressCentreLittlePond));
-
-
-			timerBeforeGoBigPond-=Time.deltaTime;
-
-			if(timerBeforeGoBigPond<=0f)
-			{
-				goBigPond = true;
-				goCenter = false;
-
-				radiusMotion.minMaxNextValue = new Vector2(1f,11f);
-				radiusMotion.minMaxDurationProgress= new Vector2(1f,1.5f);
-
-
-				speedProgressCircle.minMaxNextValue = new Vector2(0.1f,0.3f);
-				radiusMotion.minMaxDurationProgress= new Vector2(1f,3f);
-				speedProgressCircle.useRandomSigne = true;
-
-
-			}
-
-
-		}
 
 
 
@@ -497,6 +584,12 @@ public class FishScript : MonoBehaviour {
 		}
 	}
 
+	void LateUpdate()
+	{
+		if(dead)
+		DestroyImmediate(this.gameObject);
+	}
+
 
 
 	float Radians(float value)
@@ -557,6 +650,21 @@ public class FishScript : MonoBehaviour {
 		tailLenght+=(nextTailLenght-tailLenght)*valueProgressProgress;
 
 		headSize+=(nextHeadSize-headSize)*valueProgressProgress;
+
+		if(dying)
+		{
+			finalLife=Mathf.Clamp01(finalLife-Time.deltaTime);
+		}
+
+
+		headSize = headSize*finalLife;
+
+
+
+
+
+
+
 		for (int i=0; i<bodyParts.Length; i++)
 		{
 			float progress = Map ((float)i,0f,(float)(bodyParts.Length-1),0f,1f);
@@ -566,5 +674,33 @@ public class FishScript : MonoBehaviour {
 
 			bodyParts[i].GetComponent<Renderer>().material.SetFloat ("_OutlineWidth",outlineWidth);
 		}
+
+		if(finalLife==0f)
+		{
+			GoDestroy();
+		}
+
+
+
+
+
+
+
 	}
+
+	void GoDestroy()
+	{
+		dead = true;
+
+	}
+
+	public void GoDie()
+	{
+		dying = true;
+
+
+	}
+
+
+
 }
