@@ -443,7 +443,7 @@ public class FishScript : MonoBehaviour {
 				if(progressChangementPond==1f)
 				{
 
-					main.currentFish = null;
+					//main.currentFish = null;
 					isInBigPond = true;
 
 					goBigPond = false;
