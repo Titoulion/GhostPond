@@ -46,8 +46,7 @@ public class OSCInterface : MonoBehaviour
     {
 
         // Send something from PureData and it shows up in the Unity console
-        if (packet.Address.StartsWith("/player/status"))
-        {
+        if (packet.Address.StartsWith("/player/status")){
         	if(Int32.Parse(packet.Data[0].ToString()) == 1){
                 //Player Connected!
                 Debug.Log("Player Connected!");
@@ -77,6 +76,59 @@ public class OSCInterface : MonoBehaviour
             // min is 0. max is 1.
             float activation = float.Parse(packet.Data[0].ToString());
             Debug.Log("Activation: " + activation);
+        }if (packet.Address.StartsWith("/button/pressure/status")){
+            if (Int32.Parse(packet.Data[0].ToString()) == 1)
+            {
+                //Rock lifted!
+                Debug.Log("Pressure button " + packet.Data[0]);
+
+            }
+            else if (Int32.Parse(packet.Data[0].ToString()) == 0)
+            {
+                //Rock in Place
+                Debug.Log("Pressure button " + packet.Data[0]);
+
+            }
+
+        }if (packet.Address.StartsWith("/button/right/status"))
+        {
+            if (Int32.Parse(packet.Data[0].ToString()) == 1)
+            {
+                Debug.Log("Right button " + packet.Data[0]);
+
+            }
+            else if (Int32.Parse(packet.Data[0].ToString()) == 0)
+            {
+                Debug.Log("Right button " + packet.Data[0]);
+
+            }
+
+        }if (packet.Address.StartsWith("/button/center/status"))
+        {
+            if (Int32.Parse(packet.Data[0].ToString()) == 1)
+            {
+                Debug.Log("Center button " + packet.Data[0]);
+
+            }
+            else if (Int32.Parse(packet.Data[0].ToString()) == 0)
+            {
+                Debug.Log("Center button " + packet.Data[0]);
+
+            }
+
+        } if (packet.Address.StartsWith("/button/left/status"))
+        {
+            if (Int32.Parse(packet.Data[0].ToString()) == 1)
+            {
+                Debug.Log("Left button " + packet.Data[0]);
+
+            }
+            else if (Int32.Parse(packet.Data[0].ToString()) == 0)
+            {
+                Debug.Log("Left button " + packet.Data[0]);
+
+            }
+
         }
         //Debug.Log(packet.Address + ": " + DataToString(packet.Data));
 
