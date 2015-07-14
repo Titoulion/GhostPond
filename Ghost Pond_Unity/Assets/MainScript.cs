@@ -48,8 +48,12 @@ public class MainScript : MonoBehaviour {
 	public bool pathOpened = false;
 
 
+	public IconScript iconHeart;
+	public IconScript iconStone;
 
-
+	public GameObject littlePond;
+	public GameObject bigPond;
+	float progressClosePond = 0f;
 
 
 	void Awake()
@@ -195,6 +199,24 @@ public class MainScript : MonoBehaviour {
 
 		ActivateStuff();
 		CheckToFreeFish();
+
+
+		if(currentFish==null)
+		{
+			progressClosePond+=Time.deltaTime;
+		}
+		else
+		{
+			progressClosePond-=Time.deltaTime;
+		}
+
+		progressClosePond=Mathf.Clamp01(progressClosePond);
+
+
+		littlePond.GetComponent<Renderer>().material.SetFloat("_EdgeWidth",Map (progressClosePond,0f,1f,0.268f,1f));
+
+
+
 
 	}
 
@@ -384,7 +406,7 @@ public class MainScript : MonoBehaviour {
 
 		if(_code.Length>=3)
 		{
-			if(_code[0].ToString ()=="1" || Input.GetKeyDown (KeyCode.Keypad1))
+			if(_code[0].ToString ()=="1" || Input.GetKey (KeyCode.Keypad1))
 			{
 				AffectProperty1();
 				doCheckCreateFish = true;
@@ -392,13 +414,13 @@ public class MainScript : MonoBehaviour {
 
 			}
 			
-			if(_code[1].ToString ()=="1" || Input.GetKeyDown (KeyCode.Keypad2))
+			if(_code[1].ToString ()=="1" || Input.GetKey (KeyCode.Keypad2))
 			{
 				AffectProperty2();
 				doCheckCreateFish = true;
 			}
 			
-			if(_code[2].ToString ()=="1" || Input.GetKeyDown (KeyCode.Keypad3))
+			if(_code[2].ToString ()=="1" || Input.GetKey (KeyCode.Keypad3))
 			{
 				AffectProperty3();
 				doCheckCreateFish = true;
@@ -411,6 +433,11 @@ public class MainScript : MonoBehaviour {
 			CheckToCreateFish();
 			doCheckCreateFish = false;
 		}
+		else
+		{
+			iconHeart.myState = IconScript.State.Off;
+			iconStone.myState = IconScript.State.Off;
+		}
 
 
 
@@ -418,9 +445,33 @@ public class MainScript : MonoBehaviour {
 
 	void CheckToCreateFish()
 	{
-		if(currentFish == null && pathOpened==false && playerConnected==true && wasPlayerConnected == true)
+		if(currentFish == null) 
 		{
-			CreateFish();
+			if(pathOpened==false && playerConnected==true && wasPlayerConnected == true)
+			{
+				CreateFish();
+			}
+
+			if(playerConnected==false || wasPlayerConnected == false)
+			{
+				iconHeart.myState = IconScript.State.Blink;
+			}
+			else
+			{
+				iconHeart.myState = IconScript.State.Off;
+			}
+
+			if(pathOpened==true)
+			{
+				iconStone.myState = IconScript.State.Blink;
+			}
+			else
+			{
+				iconStone.myState = IconScript.State.Off;
+			}
+
+
+
 		}
 
 

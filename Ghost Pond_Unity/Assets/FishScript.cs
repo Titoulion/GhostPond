@@ -93,6 +93,11 @@ public class FishScript : MonoBehaviour {
 	public AnimationCurve curveToNewPond;
 
 
+	public float durationBeforeGoBigPond = 2.5f;
+	public float durationGoCenterLittlePond = 2.5f;
+
+
+
 	[System.Serializable]
 	public class ProgressValue
 	{
@@ -346,7 +351,7 @@ public class FishScript : MonoBehaviour {
 			goCenter = true;
 			//progressCentreLittlePond = 0f;
 			transitionFromProgressCircle = Modulo(progressCircle,1f)-4f;
-			timerBeforeGoBigPond = 10f;
+			timerBeforeGoBigPond = durationGoCenterLittlePond+durationBeforeGoBigPond;
 		}
 
 
@@ -405,7 +410,7 @@ public class FishScript : MonoBehaviour {
 		{
 			if(goCenter)
 			{
-				progressCentreLittlePond=Mathf.Clamp01(progressCentreLittlePond+Time.deltaTime*0.2f);
+				progressCentreLittlePond=Mathf.Clamp01(progressCentreLittlePond+Time.deltaTime/durationGoCenterLittlePond);
 
 
 
