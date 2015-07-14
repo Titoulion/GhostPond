@@ -97,6 +97,10 @@ public class FishScript : MonoBehaviour {
 	public float durationGoCenterLittlePond = 2.5f;
 
 
+	public AnimationCurve curveSize;
+
+
+
 
 	[System.Serializable]
 	public class ProgressValue

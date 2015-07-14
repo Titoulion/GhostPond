@@ -56,6 +56,11 @@ public class MainScript : MonoBehaviour {
 	float progressClosePond = 0f;
 
 
+	public int[] stateButtons = new int[]{0,0,0};
+
+
+
+
 	void Awake()
 	{
 		Instance = this;
@@ -395,7 +400,7 @@ public class MainScript : MonoBehaviour {
 
 	void ActivateStuff()
 	{
-		string _code = GetIntBinaryString(lastCode);
+		//string _code = GetIntBinaryString(lastCode);
 
 	
 
@@ -404,9 +409,9 @@ public class MainScript : MonoBehaviour {
 
 		bool doCheckCreateFish = false;
 
-		if(_code.Length>=3)
-		{
-			if(_code[0].ToString ()=="1" || Input.GetKey (KeyCode.Keypad1))
+		//if(_code.Length>=3)
+		//{
+			if(stateButtons[0]==1 || Input.GetKey (KeyCode.Keypad1))
 			{
 				AffectProperty1();
 				doCheckCreateFish = true;
@@ -414,18 +419,18 @@ public class MainScript : MonoBehaviour {
 
 			}
 			
-			if(_code[1].ToString ()=="1" || Input.GetKey (KeyCode.Keypad2))
+			if(stateButtons[1]==1 || Input.GetKey (KeyCode.Keypad2))
 			{
 				AffectProperty2();
 				doCheckCreateFish = true;
 			}
 			
-			if(_code[2].ToString ()=="1" || Input.GetKey (KeyCode.Keypad3))
+			if(stateButtons[2]==1 || Input.GetKey (KeyCode.Keypad3))
 			{
 				AffectProperty3();
 				doCheckCreateFish = true;
 			}
-		}
+		//}
 
 
 		if(doCheckCreateFish)
@@ -514,5 +519,15 @@ public class MainScript : MonoBehaviour {
 		return new string(b);
 	}
 
+
+	public void RockInPlace(bool rockInPlace)
+	{
+		pathOpened = !rockInPlace;
+	}
+
+	public void UpdateStateButtons(int index, int state)
+	{
+		stateButtons[index] = state;
+	}
 
 }

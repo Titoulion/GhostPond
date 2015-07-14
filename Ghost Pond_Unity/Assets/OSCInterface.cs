@@ -81,12 +81,14 @@ public class OSCInterface : MonoBehaviour
             {
                 //Rock lifted!
                 Debug.Log("Pressure button " + packet.Data[0]);
+				main.RockInPlace(false);
 
             }
             else if (Int32.Parse(packet.Data[0].ToString()) == 0)
             {
                 //Rock in Place
                 Debug.Log("Pressure button " + packet.Data[0]);
+				main.RockInPlace(true);
 
             }
 
@@ -95,12 +97,13 @@ public class OSCInterface : MonoBehaviour
             if (Int32.Parse(packet.Data[0].ToString()) == 1)
             {
                 Debug.Log("Right button " + packet.Data[0]);
+				main.UpdateStateButtons(2,1);
 
             }
             else if (Int32.Parse(packet.Data[0].ToString()) == 0)
             {
                 Debug.Log("Right button " + packet.Data[0]);
-
+				main.UpdateStateButtons(2,0);
             }
 
         }if (packet.Address.StartsWith("/button/center/status"))
@@ -108,11 +111,13 @@ public class OSCInterface : MonoBehaviour
             if (Int32.Parse(packet.Data[0].ToString()) == 1)
             {
                 Debug.Log("Center button " + packet.Data[0]);
+				main.UpdateStateButtons(1,1);
 
             }
             else if (Int32.Parse(packet.Data[0].ToString()) == 0)
             {
                 Debug.Log("Center button " + packet.Data[0]);
+				main.UpdateStateButtons(1,0);
 
             }
 
@@ -121,11 +126,13 @@ public class OSCInterface : MonoBehaviour
             if (Int32.Parse(packet.Data[0].ToString()) == 1)
             {
                 Debug.Log("Left button " + packet.Data[0]);
+				main.UpdateStateButtons(0,1);
 
             }
             else if (Int32.Parse(packet.Data[0].ToString()) == 0)
             {
                 Debug.Log("Left button " + packet.Data[0]);
+				main.UpdateStateButtons(0,0);
 
             }
 
