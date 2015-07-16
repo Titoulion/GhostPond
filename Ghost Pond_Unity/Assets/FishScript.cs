@@ -18,11 +18,12 @@ public class FishScript : MonoBehaviour {
 
 
 	float[] randomValues = new float[0];
+	float[] randomValues2 = new float[0];
 	int[] randomSens = new int[0];
 	bool started = false;
 	MainScript main;
 
-
+	public float speedMotionBodyPart = 1f;
 
 
 
@@ -37,19 +38,20 @@ public class FishScript : MonoBehaviour {
 	Vector2 minMaxSpeedVirage;
 
 
+	public float nextRadiusMotionBodyParts = 1f;
+	float radiusMotionBodyParts = 1f;
 
-	public float radiusMotionBodyParts = 1f;
 
+	public float speedMotion = 1f;
 
-	float speedMotion = 1f;
 	public ProgressValue radiusMotion = new ProgressValue();
 	public float progressCircle;
 	public ProgressValue speedProgressCircle = new ProgressValue();
 
-	public Color mainColorA;
-	public Color mainColorB;
-	public Color outlineColorA;
-	public Color outlineColorB;
+	public Color mainColor1A;
+	public Color mainColor1B;
+	public Color mainColor2A;
+	public Color mainColor2B;
 
 
 	float headSize = 0f;
@@ -57,6 +59,8 @@ public class FishScript : MonoBehaviour {
 
 	float outlineWidth = 0f;
 	public float nextOutlineWidth;
+
+
 
 	float timeLife = 0f;
 
@@ -97,7 +101,29 @@ public class FishScript : MonoBehaviour {
 	public float durationGoCenterLittlePond = 2.5f;
 
 
-	public AnimationCurve curveSize;
+	public AnimationCurve curveSizeA;
+	public AnimationCurve curveSizeB;
+
+	public float nextLerpColor1;
+	float lerpColor1;
+
+	public float nextLerpColor2;
+	float lerpColor2;
+
+
+	public float nextLerpValueSize = 0f;
+	float lerpValueSize = 0f;
+
+	public AnimationCurve curveTransfertValuesBigPond;
+
+	Vector3 petitPondCentre;
+	Vector3 petitPondExit;
+
+	public float multDecal = 2.5f;
+
+	public Vector2 minMaxTrailTime;
+
+
 
 
 
@@ -119,19 +145,24 @@ public class FishScript : MonoBehaviour {
 		public AnimationCurve curveProgress;
 
 		public bool useRandomSigne = false;
+
+		float _speedMotion = 1f;
+
+
 		
 		//public float sens = 1f;
 
-		public void Init()
+		public void Init(float valueSpeedMotion)
 		{
 			value = Random.Range (minMaxNextValue.x,minMaxNextValue.y);
+			_speedMotion = valueSpeedMotion;
 			ChangeValues();
 		}
 
 		public void Update()
 		{
 
-			progress=Mathf.Clamp01(progress+Time.deltaTime/durationProgress);
+			progress=Mathf.Clamp01(progress+_speedMotion*Time.deltaTime/durationProgress);
 
 			value = Mathf.Lerp(prevValue,nextValue,curveProgress.Evaluate(progress));
 
@@ -176,6 +207,12 @@ public class FishScript : MonoBehaviour {
 	void Start () 
 	{
 		main = MainScript.Instance;
+
+
+		petitPondCentre = Vector3.zero+(main.littlePond.transform.position-main.bigPond.transform.position)*multDecal;
+		petitPondExit = petitPondCentre+Vector3.Normalize(main.bigPond.transform.position-main.littlePond.transform.position)*2f*1f;
+		centerPond = petitPondCentre;
+
 		InitValues();
 
 		RandomColors();
@@ -187,26 +224,30 @@ public class FishScript : MonoBehaviour {
 
 	void RandomColors()
 	{
-		mainColorA = new Color(Random.value,Random.value,Random.value);
-		mainColorB = new Color(Random.value,Random.value,Random.value);
-		outlineColorA = new Color(Random.value,Random.value,Random.value);
-		outlineColorB = new Color(Random.value,Random.value,Random.value);
+		mainColor1A = new Color(Random.value,Random.value,Random.value);
+		mainColor1B = new Color(Random.value,Random.value,Random.value);
+		mainColor2A = new Color(Random.value,Random.value,Random.value);
+		mainColor2B = new Color(Random.value,Random.value,Random.value);
 	}
 
 
 	void InitValues()
 	{
 
+		numberBodyParts = Random.Range (18,30);
 
-
-		radiusMotion.Init();
-		speedProgressCircle.Init();
-
-
-
+		radiusMotion.Init(speedMotion);
+		speedProgressCircle.Init(speedMotion);
 
 
 
+
+
+		float rand1 = Random.Range(0.1f,0.4f);
+
+		minMaxTrailTime = new Vector2(rand1,rand1+Random.Range (0.2f,0.5f));
+		speedMotion = Random.Range (0.45f,1.45f);
+		speedMotionBodyPart = Random.Range (0.7f,1.35f);
 
 
 		//nextHeadSize = Random.Range (1f,4f);
@@ -216,20 +257,37 @@ public class FishScript : MonoBehaviour {
 
 		radiusMotionBodyParts = Random.Range (0f,1.2f);
 
-
+		/*petitPondCentre = Vector3.zero+(main.littlePond.transform.position-main.bigPond.transform.position)*multDecal;
+		petitPondExit = petitPondCentre+Vector3.Normalize(main.bigPond.transform.position-main.littlePond.transform.position)*2f*1f;
+		centerPond = petitPondCentre;*/
 
 	}
 
-	public void SetInitPropertiesValues(float p1, float p2, float p3)
+	public void SetInitPropertiesValues(float p1, float p1B, float p2,float p2B,float p2C, float p3, float p3B)
 	{
 		nextTailLenght = p1;
 		tailLenght = p1;
 
+		nextRadiusMotionBodyParts = p1B;
+		radiusMotionBodyParts = p1B;
+
 		nextOutlineWidth = p2;
 		outlineWidth = p2;
 
+		nextLerpColor1 = p2B;
+		lerpColor1 = p2B;
+
+		nextLerpColor2= p2C;
+		lerpColor2 = p2C;
+
 		nextHeadSize = p3;
 		headSize = 0f;
+
+		nextLerpValueSize = p3B;
+		lerpValueSize = p3B;
+
+
+
 	}
 
 	void ChangeValuesVirage()
@@ -256,6 +314,7 @@ public class FishScript : MonoBehaviour {
 		bodyParts = new GameObject[numberBodyParts];
 		bodyPartsPositions = new Vector3[numberBodyParts];
 		randomValues = new float[numberBodyParts];
+		randomValues2 = new float[numberBodyParts];
 		randomSens = new int[numberBodyParts];
 
 
@@ -272,23 +331,34 @@ public class FishScript : MonoBehaviour {
 			bodyPart.transform.parent = transform;
 			bodyPart.GetComponent<Renderer>().material.SetFloat ("_RotationPerlin",Random.Range (0f,360f));
 
+			float valueSizeA = curveSizeA.Evaluate(Mathf.Clamp01(progress));
+			float valueSizeB = curveSizeB.Evaluate(Mathf.Clamp01(progress));
+
+			BodyPartScript thisBodyPartScript = bodyPart.GetComponent<BodyPartScript>();
+			TrailRenderer thisBodyPartTrail = bodyPart.GetComponent<TrailRenderer>();
+
+			thisBodyPartScript.SetSize(headSize* Mathf.Lerp(valueSizeA,valueSizeB,lerpValueSize));
 
 
-			bodyPart.GetComponent<BodyPartScript>().SetSize(headSize* progress);
+
+
+
+
+
 			bodyParts[i] = bodyPart;
 
 			//bodyPart.GetComponent<BodyPartScript>().SetLerpsColors(Mathf.PerlinNoise(progress*512f,0f),Mathf.PerlinNoise(progress*512f,0f));
-			bodyPart.GetComponent<BodyPartScript>().SetLerpsColors(main.Map(progress,1f,0f,0.2f,0.8f),main.Map(progress,1f,0f,0.2f,0.8f));
-			bodyPart.GetComponent<BodyPartScript>().SetOutlineWidth(Random.Range(0.0f,0.2f));
-			bodyPart.GetComponent<BodyPartScript>().SetOutlineWidth(Random.value>0.5f?1f:0f);
-			bodyPart.GetComponent<BodyPartScript>().SetOutlineWidth(0f);
+			thisBodyPartScript.SetLerpsColors(lerpColor1,lerpColor2);
+			thisBodyPartScript.SetOutlineWidth(Random.Range(0.0f,0.2f));
+			thisBodyPartScript.SetOutlineWidth(Random.value>0.5f?1f:0f);
+			thisBodyPartScript.SetOutlineWidth(0f);
+			thisBodyPartScript.SetTransitionColorValue(progress);
 
 
 
 
 
-
-			bodyPart.GetComponent<BodyPartScript>().SetColors(mainColorA,mainColorB,mainColorB,mainColorA);
+			thisBodyPartScript.SetColors(mainColor1A,mainColor1B,mainColor2A,mainColor2B);
 
 
 			if(i>0)
@@ -297,14 +367,17 @@ public class FishScript : MonoBehaviour {
 			}
 			else
 			{
-				Destroy (bodyPart.GetComponent<LineRenderer>());
+				//Destroy (bodyPart.GetComponent<LineRenderer>());
 			}
+			randomValues[i]=Random.value;
+			randomValues2[i]=Random.value;
+		randomSens[i]=Random.value<0.5f?-1:1;
 
-			bodyPart.GetComponent<TrailRenderer>().startWidth =bodyPart.GetComponent<BodyPartScript>().GetSize();
-			bodyPart.GetComponent<TrailRenderer>().endWidth =0f;
-			bodyPart.GetComponent<TrailRenderer>().material.color = bodyPart.GetComponent<BodyPartScript>().GetColors()[(int)(Random.value>0.5f?1f:0f)];
-			bodyPart.GetComponent<TrailRenderer>().material.color = bodyPart.GetComponent<BodyPartScript>().GetColors()[0];
-			bodyPart.GetComponent<TrailRenderer>().time = progress*0.3f+0.3f;
+			thisBodyPartTrail.startWidth =thisBodyPartScript.GetSize();
+			thisBodyPartTrail.endWidth =0f;
+			thisBodyPartTrail.material.color = thisBodyPartScript.GetTransitionColor();
+		//	bodyPart.GetComponent<TrailRenderer>().material.color = bodyPart.GetComponent<BodyPartScript>().GetColors()[0];
+			thisBodyPartTrail.time = minMaxTrailTime.x+(minMaxTrailTime.y-minMaxTrailTime.x)*(progress);
 
 			bodyPartsPositions[i] = transform.position;
 
@@ -312,8 +385,7 @@ public class FishScript : MonoBehaviour {
 
 
 
-			randomValues[i]=Random.value;
-			randomSens[i]=Random.value<0.5f?-1:1;
+
 
 		}
 		
@@ -323,7 +395,6 @@ public class FishScript : MonoBehaviour {
 	// Update is called once per frame
 	void Update () 
 	{
-
 		if(!dead)
 		{
 			if(started)
@@ -331,8 +402,6 @@ public class FishScript : MonoBehaviour {
 				UpdateValues();
 				Mouvement();
 				PositionBodyParts();
-				
-				
 				timeLife+=Time.deltaTime;
 			}
 		}
@@ -398,12 +467,7 @@ public class FishScript : MonoBehaviour {
 
 	void Mouvement()
 	{
-		progressCircle+=Time.deltaTime*speedProgressCircle.value*main.pulse;
-
-
-
-
-
+		progressCircle+=Time.deltaTime*speedProgressCircle.value*main.pulse*speedMotion;
 
 
 		float _progressCircle = progressCircle;
@@ -437,7 +501,17 @@ public class FishScript : MonoBehaviour {
 			{
 
 				progressChangementPond = Mathf.Clamp01(progressChangementPond+Time.deltaTime*0.2f);
-				centerPond = Vector3.Lerp(Vector3.right*15f,Vector3.zero,curveToNewPond.Evaluate(progressChangementPond));
+				centerPond = Vector3.Lerp(petitPondExit,Vector3.zero,curveToNewPond.Evaluate(progressChangementPond));
+
+
+				radiusMotion.minMaxNextValue = Vector2.Lerp(new Vector2(2.2f,2.8f),new Vector2(1f,11f),curveTransfertValuesBigPond.Evaluate(progressChangementPond));
+				radiusMotion.minMaxDurationProgress= Vector2.Lerp(new Vector2(1f,1.5f),new Vector2(1f,1.5f),curveTransfertValuesBigPond.Evaluate(progressChangementPond));
+				
+				
+				speedProgressCircle.minMaxNextValue = Vector2.Lerp(new Vector2(0.2f,0.4f),new Vector2(0.1f,0.3f),curveTransfertValuesBigPond.Evaluate(progressChangementPond));
+				speedProgressCircle.minMaxDurationProgress= Vector2.Lerp(new Vector2(1f,3f),new Vector2(1f,3f),curveTransfertValuesBigPond.Evaluate(progressChangementPond));
+
+
 
 
 				if(progressChangementPond==1f)
@@ -454,7 +528,7 @@ public class FishScript : MonoBehaviour {
 			{
 
 
-				centerPond = Vector3.Lerp(Vector3.right*17f,Vector3.right*15f,curveGoCenter.Evaluate(progressCentreLittlePond));
+				centerPond = Vector3.Lerp(petitPondCentre,petitPondExit,curveGoCenter.Evaluate(progressCentreLittlePond));
 
 				if(goCenter)
 				{
@@ -468,29 +542,13 @@ public class FishScript : MonoBehaviour {
 						goBigPond = true;
 						goCenter = false;
 						
-						radiusMotion.minMaxNextValue = new Vector2(1f,11f);
-						radiusMotion.minMaxDurationProgress= new Vector2(1f,1.5f);
-						
-						
-						speedProgressCircle.minMaxNextValue = new Vector2(0.1f,0.3f);
-						radiusMotion.minMaxDurationProgress= new Vector2(1f,3f);
+
 						speedProgressCircle.useRandomSigne = true;
 						
 						main.currentFish = null;
 						
 					}
 
-
-
-						
-
-
-
-
-
-
-					
-					
 				}
 
 
@@ -521,36 +579,31 @@ public class FishScript : MonoBehaviour {
 		pos+=Vector3.up*Mathf.Sin(Time.realtimeSinceStartup*2f)*progressCentreLittlePond*0.2f+Vector3.right*Mathf.Cos(Time.realtimeSinceStartup*2f)*progressCentreLittlePond*0.2f;
 
 
-
-
-
-
 		transform.position = pos;
 
 	}
 
 	void PositionBodyParts()
 	{
-		if(started)
+
+
+		for (int i=0; i<bodyParts.Length; i++)
 		{
 
-			for (int i=0; i<bodyParts.Length; i++)
+			//float _i = (float)i;
+
+
+			//float progress = Map (_i,0f,(float)(bodyParts.Length-1),0f,1f);
+
+
+			if(i!=0)
 			{
+				float progressB = Map ((float)i,1f,(float)(bodyParts.Length-1),0f,1f);
 
-				//float _i = (float)i;
-
-
-				//float progress = Map (_i,0f,(float)(bodyParts.Length-1),0f,1f);
+				float nodeAngle	 =	Mathf.Atan2(bodyPartsPositions[i].y - bodyPartsPositions[i-1].y,bodyPartsPositions[i].x - bodyPartsPositions[i-1].x);
 
 
-				if(i!=0)
-				{
-					float progressB = Map ((float)i,1f,(float)(bodyParts.Length-1),0f,1f);
-
-					float nodeAngle	 =	Mathf.Atan2(bodyPartsPositions[i].y - bodyPartsPositions[i-1].y,bodyPartsPositions[i].x - bodyPartsPositions[i-1].x);
-
-
-					float thisTailLength = tailLenght*(1f-progressB);
+				float thisTailLength = tailLenght*(1f-progressB);
 
 
 
@@ -558,39 +611,39 @@ public class FishScript : MonoBehaviour {
 
 
 
-					bodyPartsPositions[i] = new Vector3(bodyPartsPositions[i-1].x + thisTailLength * Mathf.Cos(nodeAngle),bodyPartsPositions[i-1].y + thisTailLength * Mathf.Sin(nodeAngle),0f);
+				bodyPartsPositions[i] = new Vector3(bodyPartsPositions[i-1].x + thisTailLength * Mathf.Cos(nodeAngle),bodyPartsPositions[i-1].y + thisTailLength * Mathf.Sin(nodeAngle),0f);
 
 
 
 
-					Vector3 toForward = Vector3.Normalize (bodyPartsPositions[i]-bodyPartsPositions[i-1]);
-					Vector3 toUp = Vector3.Cross (toForward,Vector3.forward);
+				Vector3 toForward = Vector3.Normalize (bodyPartsPositions[i]-bodyPartsPositions[i-1]);
+				Vector3 toUp = Vector3.Cross (toForward,Vector3.forward);
 
 
 
-					float randomValue = randomValues[i];
-					float randomValueT =  randomValue + Time.realtimeSinceStartup*randomSens[i];
+				float randomValue = randomValues[i];
+				float randomValueT =  randomValue + Time.realtimeSinceStartup*randomSens[i]*speedMotionBodyPart;
 
 
-					bodyParts[i].transform.position = bodyPartsPositions[i]+toForward*Mathf.Cos (randomValueT*2f*Mathf.PI)*radiusMotionBodyParts*progressB+toUp*Mathf.Sin (randomValueT*2f*Mathf.PI)*radiusMotionBodyParts*progressB;
+				bodyParts[i].transform.position = bodyPartsPositions[i]+toForward*Mathf.Cos (randomValueT*2f*Mathf.PI)*radiusMotionBodyParts*progressB+toUp*Mathf.Sin (randomValueT*2f*Mathf.PI)*radiusMotionBodyParts*progressB;
 
 
-					//bodyParts[i].GetComponent<LineRenderer>().SetPosition(0,bodyParts[i].transform.position);
-					//bodyParts[i].GetComponent<LineRenderer>().SetPosition(1,bodyParts[i-1].transform.position);
-
-
-				}
-				else
-				{
-					bodyPartsPositions[0] = transform.position;
-					bodyParts[0].transform.position = bodyPartsPositions[0];
-				}
-
-				//bodyParts[i].transform.localScale = Vector3.one*headSize* (1f-Mathf.Clamp01(progress));
+				//bodyParts[i].GetComponent<LineRenderer>().SetPosition(0,bodyParts[i].transform.position);
+				//bodyParts[i].GetComponent<LineRenderer>().SetPosition(1,bodyParts[i-1].transform.position);
 
 
 			}
+			else
+			{
+				bodyPartsPositions[0] = transform.position;
+				bodyParts[0].transform.position = bodyPartsPositions[0];
+			}
+
+			//bodyParts[i].transform.localScale = Vector3.one*headSize* (1f-Mathf.Clamp01(progress));
+
+
 		}
+
 	}
 
 	void LateUpdate()
@@ -619,27 +672,74 @@ public class FishScript : MonoBehaviour {
 	public void AffectProperty1(float _value)
 	{
 		//nextTailLenght = nextTailLenght>0.7f?Random.Range (0.1f,0.7f):Random.Range (0.7f,1.3f);
-
+		if(!isInBigPond && !goBigPond && !goCenter)
 		nextTailLenght = _value;
 		//ProgressionsProperties();
 
 
 	}
 
+	public void AffectProperty1B(float _value)
+	{
+		//nextTailLenght = nextTailLenght>0.7f?Random.Range (0.1f,0.7f):Random.Range (0.7f,1.3f);
+		if(!isInBigPond && !goBigPond && !goCenter)
+		nextRadiusMotionBodyParts = _value;
+		//ProgressionsProperties();
+		
+		
+	}
+
 	public void AffectProperty2(float _value)
 	{
 		//radiusMotionBodyParts = radiusMotionBodyParts>0.75f?Random.Range (0f,0.75f):Random.Range (0.75f,1.5f);
 		//nextOutlineWidth = nextOutlineWidth>0.5f?Random.Range (0f,0.5f):Random.Range (0.5f,1f);
+
+		if(!isInBigPond && !goBigPond && !goCenter)
 		nextOutlineWidth = _value;
+		//ProgressionsProperties();
+	}
+
+	public void AffectProperty2B(float _value)
+	{
+		//radiusMotionBodyParts = radiusMotionBodyParts>0.75f?Random.Range (0f,0.75f):Random.Range (0.75f,1.5f);
+		//nextOutlineWidth = nextOutlineWidth>0.5f?Random.Range (0f,0.5f):Random.Range (0.5f,1f);
+
+
+		if(!isInBigPond && !goBigPond && !goCenter)
+		nextLerpColor1 = _value;
+		//ProgressionsProperties();
+	}
+
+	public void AffectProperty2C(float _value)
+	{
+		//radiusMotionBodyParts = radiusMotionBodyParts>0.75f?Random.Range (0f,0.75f):Random.Range (0.75f,1.5f);
+		//nextOutlineWidth = nextOutlineWidth>0.5f?Random.Range (0f,0.5f):Random.Range (0.5f,1f);
+
+
+		if(!isInBigPond && !goBigPond && !goCenter)
+		nextLerpColor2 = _value;
 		//ProgressionsProperties();
 	}
 
 	public void AffectProperty3(float _value)
 	{
 		//nextHeadSize = nextHeadSize>2.5f?Random.Range (0f,2.5f):Random.Range (2.5f,4f);
+
+		if(!isInBigPond && !goBigPond && !goCenter)
 		nextHeadSize = _value;
 	//	ProgressionsProperties();
 	}
+
+	public void AffectProperty3B(float _value)
+	{
+		//nextHeadSize = nextHeadSize>2.5f?Random.Range (0f,2.5f):Random.Range (2.5f,4f);
+
+		if(!isInBigPond && !goBigPond && !goCenter)
+		nextLerpValueSize = _value;
+		//	ProgressionsProperties();
+	}
+
+
 
 	void ProgressionsProperties()
 	{
@@ -650,15 +750,37 @@ public class FishScript : MonoBehaviour {
 
 
 
-		outlineWidth += (nextOutlineWidth-outlineWidth)*valueProgressProgress;
+
+
+		if(!isInBigPond && !goBigPond && !goCenter)
+		{
+			lerpColor1 += (nextLerpColor1-lerpColor1)*valueProgressProgress;
+			lerpColor2 += (nextLerpColor2-lerpColor2)*valueProgressProgress;
+			
+			
+			outlineWidth += (nextOutlineWidth-outlineWidth)*valueProgressProgress;
+			
+			radiusMotionBodyParts += (nextRadiusMotionBodyParts-radiusMotionBodyParts)*valueProgressProgress;
+			
+			
+			
+			tailLenght+=(nextTailLenght-tailLenght)*valueProgressProgress;
+			
+			headSize+=(nextHeadSize-headSize)*valueProgressProgress;
+			
+			lerpValueSize+=(nextLerpValueSize-lerpValueSize)*valueProgressProgress;
+		}
 
 
 
 
 
-		tailLenght+=(nextTailLenght-tailLenght)*valueProgressProgress;
 
-		headSize+=(nextHeadSize-headSize)*valueProgressProgress;
+
+
+
+
+
 
 		if(dying)
 		{
@@ -677,12 +799,39 @@ public class FishScript : MonoBehaviour {
 		for (int i=0; i<bodyParts.Length; i++)
 		{
 			float progress = Map ((float)i,0f,(float)(bodyParts.Length-1),0f,1f);
-			bodyParts[i].GetComponent<BodyPartScript>().SetSize(headSize* (1f-Mathf.Clamp01(progress)));
-			bodyParts[i].GetComponent<TrailRenderer>().startWidth =bodyParts[i].GetComponent<BodyPartScript>().GetSize();
-			bodyParts[i].GetComponent<TrailRenderer>().endWidth =0f;
 
-			bodyParts[i].GetComponent<Renderer>().material.SetFloat ("_OutlineWidth",outlineWidth);
+
+			float valueSizeA = curveSizeA.Evaluate((1f-Mathf.Clamp01(progress)));
+			float valueSizeB = curveSizeB.Evaluate((1f-Mathf.Clamp01(progress)));
+
+			BodyPartScript thisBodyPartScript = bodyParts[i].GetComponent<BodyPartScript>();
+			TrailRenderer thisBodyPartTrail = bodyParts[i].GetComponent<TrailRenderer>();
+
+
+
+
+			thisBodyPartScript.SetSize(headSize* Mathf.Lerp(valueSizeA,valueSizeB,lerpValueSize));
+
+
+			thisBodyPartTrail.startWidth =thisBodyPartScript.GetSize();
+			thisBodyPartTrail.endWidth =0f;
+			//bodyParts[i].GetComponent<TrailRenderer>().time = minMaxTrailTime.x+(minMaxTrailTime.y-minMaxTrailTime.x)*(1f-progress);
+
+			thisBodyPartScript.SetLerpsColors(lerpColor1,lerpColor2);
+			thisBodyPartScript.SetOutlineWidth (outlineWidth);
+
+
+			thisBodyPartTrail.material.color = thisBodyPartScript.GetTransitionColor();
+		//	bodyParts[i].GetComponent<TrailRenderer>().material.color = bodyParts[i].GetComponent<BodyPartScript>().GetColors()[0];
+
+
+
 		}
+
+
+
+
+
 
 		if(finalLife==0f)
 		{
@@ -695,6 +844,11 @@ public class FishScript : MonoBehaviour {
 
 
 
+	}
+
+	public bool CanChangeValues()
+	{
+		return(!isInBigPond && !goBigPond && !goCenter);
 	}
 
 	void GoDestroy()

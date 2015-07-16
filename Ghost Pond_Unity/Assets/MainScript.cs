@@ -20,7 +20,7 @@ public class MainScript : MonoBehaviour {
 
 
 	public bool playerConnected = false;
-	bool wasPlayerConnected = false;
+	public bool wasPlayerConnected = false;
 
 	float securityProgressON = 0f;
 	float securityProgressOFF = 0f;
@@ -37,8 +37,12 @@ public class MainScript : MonoBehaviour {
 	// Use this for initialization
 
 	public ProgressModifProperty property1;
+	public ProgressModifProperty property1B;
 	public ProgressModifProperty property2;
+	public ProgressModifProperty property2B;
+	public ProgressModifProperty property2C;
 	public ProgressModifProperty property3;
+	public ProgressModifProperty property3B;
 
 	float timeSinceLastHeartBeat = 0f;
 
@@ -48,8 +52,8 @@ public class MainScript : MonoBehaviour {
 	public bool pathOpened = false;
 
 
-	public IconScript iconHeart;
-	public IconScript iconStone;
+	//public IconScript iconHeart;
+	//public IconScript iconStone;
 
 	public GameObject littlePond;
 	public GameObject bigPond;
@@ -58,8 +62,19 @@ public class MainScript : MonoBehaviour {
 
 	public int[] stateButtons = new int[]{0,0,0};
 
+	public AnimationCurve curveBeatEffet;
+	public float forcePulsePond = 0.02f;
 
+	public LumScript sensor1;
+	public LumScript sensor2;
+	public LumScript sensor3;
 
+	public GameObject bridge;
+	float progressOpenBridge = 0f;
+
+	public ParticleSystem particleLittlePond;
+
+	bool needNewPlayer = false;
 
 	void Awake()
 	{
@@ -71,8 +86,12 @@ public class MainScript : MonoBehaviour {
 	{
 	
 		property1.Init();
+		property1B.Init();
 		property2.Init();
+		property2B.Init();
+		property2C.Init();
 		property3.Init();
+		property3B.Init();
 	}
 	
 
@@ -91,6 +110,10 @@ public class MainScript : MonoBehaviour {
 
 		if(Input.GetKeyDown(KeyCode.Backspace))
 			playerConnected = !playerConnected;
+
+
+		//if(Input.GetKeyDown(KeyCode.LeftShift))
+
 
 
 		if(currentFish!=null)
@@ -164,6 +187,10 @@ public class MainScript : MonoBehaviour {
 			securityProgressOFF=Mathf.Clamp(securityProgressOFF-Time.deltaTime,0f,securityTimeOFF);
 			if(securityProgressOFF==0f)
 			{
+
+				//PLAYER DISCONNECTED
+				needNewPlayer = false;
+
 				wasPlayerConnected = false;
 
 
@@ -182,6 +209,10 @@ public class MainScript : MonoBehaviour {
 			if(securityProgressON==0f)
 			{
 				wasPlayerConnected = true;
+
+				//PLAYER CONNECTED
+
+
 				//CreateFish();
 				isConnecting = false;
 			}
@@ -218,10 +249,24 @@ public class MainScript : MonoBehaviour {
 		progressClosePond=Mathf.Clamp01(progressClosePond);
 
 
-		littlePond.GetComponent<Renderer>().material.SetFloat("_EdgeWidth",Map (progressClosePond,0f,1f,0.268f,1f));
+		littlePond.GetComponent<Renderer>().material.SetFloat("_EdgeWidth",Map (progressClosePond,0f,1f,0.268f,1f)+(wasPlayerConnected&&playerConnected?curveBeatEffet.Evaluate(pulseProgress)*forcePulsePond:0f));
+		bigPond.GetComponent<Renderer>().material.SetFloat("_EdgeWidth",0.268f+(wasPlayerConnected&&playerConnected?curveBeatEffet.Evaluate(pulseProgress)*forcePulsePond:0f));
+
+		progressOpenBridge=Mathf.Clamp01(progressOpenBridge+(pathOpened?1f:-1f)*Time.deltaTime/0.8f);
+		bridge.GetComponent<Renderer>().material.SetFloat("_OpeningBridge",progressOpenBridge);
 
 
 
+		if(sensor1.isTouched || sensor2.isTouched || sensor3.isTouched)
+		{
+			if(particleLittlePond.isPlaying==false)
+			particleLittlePond.Play();
+		}
+		else
+		{
+			if(particleLittlePond.isPlaying==true)
+			particleLittlePond.Stop();
+		}
 
 	}
 
@@ -280,10 +325,10 @@ public class MainScript : MonoBehaviour {
 	void CreateFish()
 	{
 
-		Debug.Log ("ok");
+		//Debug.Log ("ok");
+		Vector3 posInit = Vector3.zero+(littlePond.transform.position-bigPond.transform.position)*2.5f;
 
-
-		currentFish = Instantiate (prefabFish,Vector3.right*17f,Quaternion.identity) as GameObject;
+		currentFish = Instantiate (prefabFish,posInit,Quaternion.identity) as GameObject;
 
 		/*AffectProperty1();
 
@@ -292,10 +337,15 @@ public class MainScript : MonoBehaviour {
 		AffectProperty3();*/
 
 		property1.Init ();
+		property1B.Init ();
 		property2.Init ();
+		property2B.Init ();
+		property2C.Init ();
 		property3.Init ();
-
-		currentFish.GetComponent<FishScript>().SetInitPropertiesValues(property1.GetValue(),property2.GetValue(),property3.GetValue());
+		property3B.Init ();
+		currentFish.GetComponent<FishScript>().SetInitPropertiesValues(property1.GetValue(),property1B.GetValue(),property2.GetValue(),property2B.GetValue(),property2C.GetValue(),property3.GetValue(),property3B.GetValue());
+		needNewPlayer = true;
+	
 	}
 
 	public void HeartBeat(bool isTrueHeartBeat)
@@ -312,8 +362,31 @@ public class MainScript : MonoBehaviour {
 	{
 		if(currentFish!=null)
 		{
-			property1.Update();
-			currentFish.GetComponent<FishScript>().AffectProperty1(property1.GetValue());
+
+			if(currentFish.GetComponent<FishScript>().CanChangeValues())
+			{
+				property1.Update();
+				currentFish.GetComponent<FishScript>().AffectProperty1(property1.GetValue());
+				
+				property1B.Update();
+				currentFish.GetComponent<FishScript>().AffectProperty1B(property1B.GetValue());
+				sensor1.isTouched = true;
+
+			}
+			else
+			{
+				sensor1.isTouched = false;
+			}
+
+
+
+
+
+
+		}
+		else
+		{
+			sensor1.isTouched = false;
 		}
 			
 	}
@@ -322,8 +395,28 @@ public class MainScript : MonoBehaviour {
 	{
 		if(currentFish!=null)
 		{
-			property2.Update();
-			currentFish.GetComponent<FishScript>().AffectProperty2(property2.GetValue());
+
+			if(currentFish.GetComponent<FishScript>().CanChangeValues())
+			{
+				property2.Update();
+				currentFish.GetComponent<FishScript>().AffectProperty2(property2.GetValue());
+
+				property2B.Update();
+				currentFish.GetComponent<FishScript>().AffectProperty2B(property2B.GetValue());
+
+				property2C.Update();
+				currentFish.GetComponent<FishScript>().AffectProperty2C(property2C.GetValue());
+
+				sensor2.isTouched = true;
+			}
+			else
+			{
+				sensor2.isTouched = false;
+			}
+		}
+		else
+		{
+			sensor2.isTouched = false;
 		}
 	}
 
@@ -331,13 +424,26 @@ public class MainScript : MonoBehaviour {
 	{
 		if(currentFish!=null)
 		{
-			property3.Update();
+			if(currentFish.GetComponent<FishScript>().CanChangeValues())
+			{
+				property3.Update();
 
+				currentFish.GetComponent<FishScript>().AffectProperty3(property3.GetValue());
+				
+				property3B.Update();
+				
+				currentFish.GetComponent<FishScript>().AffectProperty3B(property3B.GetValue());
 
-
-			currentFish.GetComponent<FishScript>().AffectProperty3(property3.GetValue());
-			
-
+				sensor3.isTouched = true;
+			}
+			else
+			{
+				sensor3.isTouched = false;
+			}
+		}
+		else
+		{
+			sensor3.isTouched = false;
 		}
 	}
 
@@ -418,17 +524,29 @@ public class MainScript : MonoBehaviour {
 
 
 			}
+			else
+			{
+				sensor1.isTouched = false;
+			}
 			
 			if(stateButtons[1]==1 || Input.GetKey (KeyCode.Keypad2))
 			{
 				AffectProperty2();
 				doCheckCreateFish = true;
 			}
+			else
+			{
+				sensor2.isTouched = false;
+			}
 			
 			if(stateButtons[2]==1 || Input.GetKey (KeyCode.Keypad3))
 			{
 				AffectProperty3();
 				doCheckCreateFish = true;
+			}
+			else
+			{
+				sensor3.isTouched = false;
 			}
 		//}
 
@@ -440,8 +558,8 @@ public class MainScript : MonoBehaviour {
 		}
 		else
 		{
-			iconHeart.myState = IconScript.State.Off;
-			iconStone.myState = IconScript.State.Off;
+			//iconHeart.myState = IconScript.State.Off;
+			//iconStone.myState = IconScript.State.Off;
 		}
 
 
@@ -454,25 +572,26 @@ public class MainScript : MonoBehaviour {
 		{
 			if(pathOpened==false && playerConnected==true && wasPlayerConnected == true)
 			{
-				CreateFish();
+				if(needNewPlayer==false)
+					CreateFish();
 			}
 
 			if(playerConnected==false || wasPlayerConnected == false)
 			{
-				iconHeart.myState = IconScript.State.Blink;
+				//iconHeart.myState = IconScript.State.Blink;
 			}
 			else
 			{
-				iconHeart.myState = IconScript.State.Off;
+				//iconHeart.myState = IconScript.State.Off;
 			}
 
 			if(pathOpened==true)
 			{
-				iconStone.myState = IconScript.State.Blink;
+				//iconStone.myState = IconScript.State.Blink;
 			}
 			else
 			{
-				iconStone.myState = IconScript.State.Off;
+				//iconStone.myState = IconScript.State.Off;
 			}
 
 
@@ -517,6 +636,11 @@ public class MainScript : MonoBehaviour {
 			i++;
 		}
 		return new string(b);
+	}
+
+	public float ValueHeartBeat()
+	{
+		return(curveBeatEffet.Evaluate(pulseProgress));
 	}
 
 
